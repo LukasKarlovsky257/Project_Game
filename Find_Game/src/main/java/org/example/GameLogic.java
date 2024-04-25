@@ -2,9 +2,9 @@ package org.example;
 
 import org.example.logic.*;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Random;
 
 import static org.example.logic.Direction.*;
 
@@ -14,8 +14,13 @@ public class GameLogic {
     private ArrayList<Bush> bushes;
     private BG bg;
     private ArrayList<Wall> walls;
-    private final int ENEMY_STEPS = 5;
+    private final int ENEMY_STEPS = 15;
+    public JOptionPane pane = new JOptionPane();
+    public int time = 1200;
 
+    public int getTime() {
+        return time;
+    }
 
     public GameLogic(int ballSteps) {
         this.player = null;
@@ -29,20 +34,17 @@ public class GameLogic {
         player = new Player(20, 20, "Player.png");
         bg = new BG(0, 0, "Background_no_object.png");
 
-        Enemy enemy1 = new Enemy(350,350, "Object.png",100);
-        Enemy enemy2 = new Enemy(150,250, "Object.png",100);
+        Enemy enemy1 = new Enemy(0,0, "Enemy.png",100);
+        Enemy enemy2 = new Enemy(10,10, "Enemy.png",100);
         enemies.add(enemy1);
         enemies.add(enemy2);
 
         Bush bush1 = new Bush(-100, 150,  "Object.png");
         Bush bush2 = new Bush(200, -100, "Object.png");
         Bush bush3 = new Bush(500, 0, "Object.png");
-        Bush bush4 = new Bush(-500, -150,  "Object.png");
         bushes.add(bush1);
         bushes.add(bush2);
         bushes.add(bush3);
-        bushes.add(bush4);
-
 
         Wall wall1 = new Wall(0,0,1080,0, Color.BLACK);
         Wall wall2 = new Wall(0,0,0,720, Color.RED);
@@ -55,7 +57,33 @@ public class GameLogic {
     }
 
     public void update() {
-        collision();
+        for (Wall wall: walls) {
+            for (Enemy enemy: enemies) {
+                int detectX = 0;
+                int detectY = 1;
+
+                if (detectX > detectY) {
+                    if (wall.getCoordStart().x - enemy.getCoord().x > 0) {
+                        moveEnemy(Direction.RIGHT, enemy);
+                    } else {
+                        moveEnemy(Direction.LEFT, enemy);
+                    }
+                } else {
+                    if (wall.getCoordEnd().y - enemy.getCoord().y > 0) {
+                        moveEnemy(Direction.DOWN, enemy);
+                    } else {
+                        moveEnemy(Direction.UP, enemy);
+                    }
+                }
+                if (!(time == 0)) {
+                    time--;
+                } else {
+                    JOptionPane.showMessageDialog(null, "Game Over");
+                    System.exit(0);
+                }
+                enemy.move(ENEMY_STEPS, DOWN);
+            }
+        }
     }
     public boolean predictEnemyCollision(int enemySteps, Direction direction) {
         Rectangle enemyMoveRectangle = new Rectangle();
@@ -95,51 +123,27 @@ public class GameLogic {
         }
         return false;
     }
-    public void collision() {
-        for (Enemy enemy: enemies) {
-            for (Bush bush: bushes) {
-                for (Wall wall: walls) {
-                    if (enemy.getRectangle().intersects(bush.getRectangle())) {
-                        int max=4,min=1;
-                        int number = (int) (Math.random() * ((max-min)+1));
-                        if (number == 1) {
-                            enemy.move(ENEMY_STEPS, DOWN);
-                            System.out.println("Detekce 1");
-                            break;
-                        } else if (number == 2) {
-                            enemy.move(ENEMY_STEPS, LEFT);
-                            System.out.println("Detekce 2");
-                            break;
-                        } else if (number == 3) {
-                            enemy.move(ENEMY_STEPS, RIGHT);
-                            System.out.println("Detekce 3");
-                            break;
-                        } else if (number == 4) {
-                            enemy.move(ENEMY_STEPS, UP);
-                            System.out.println("Detekce 4");
-                            break;
-                        }
-                    } else if (wall.getRectangle().intersects(enemy.getRectangle())) {
-                        int max=4,min=1;
-                        int number = (int) (Math.random() * ((max-min)+1));
-                        if (number == 1) {
-                            enemy.move(ENEMY_STEPS, DOWN);
-                            System.out.println("Detekce 1");
-                            break;
-                        } else if (number == 2) {
-                            enemy.move(ENEMY_STEPS, LEFT);
-                            System.out.println("Detekce 2");
-                            break;
-                        } else if (number == 3) {
-                            enemy.move(ENEMY_STEPS, RIGHT);
-                            System.out.println("Detekce 3");
-                            break;
-                        } else if (number == 4) {
-                            enemy.move(ENEMY_STEPS, UP);
-                            System.out.println("Detekce 4");
-                            break;
-                        }
-                    }
+
+    private void moveEnemy(Direction direction, Enemy enemy){
+        if (!predictEnemyCollision(ENEMY_STEPS, direction)) {
+            enemy.move(ENEMY_STEPS, direction);
+        } else if (predictEnemyCollision(ENEMY_STEPS, direction)) {
+            switch (direction) {
+                case UP -> {
+                    enemy.move(ENEMY_STEPS, Direction.LEFT);
+                    break;
+                }
+                case DOWN -> {
+                    enemy.move(ENEMY_STEPS, Direction.RIGHT);
+                    break;
+                }
+                case LEFT -> {
+                    enemy.move(ENEMY_STEPS, Direction.UP);
+                    break;
+                }
+                case RIGHT -> {
+                    enemy.move(ENEMY_STEPS, Direction.DOWN);
+                    break;
                 }
             }
         }
@@ -160,10 +164,7 @@ public class GameLogic {
     public ArrayList<Enemy> getEnemies() {
         return enemies;
     }
-
-    public int getENEMY_STEPS() {
-        return ENEMY_STEPS;
-    }
+    
 
     public BG getBg() {
         return bg;

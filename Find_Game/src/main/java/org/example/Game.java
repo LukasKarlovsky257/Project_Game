@@ -21,7 +21,6 @@ public class Game {
         GameGraphics graphic = new GameGraphics(logic);
         logic.initialize();
         graphic.render(logic);
-        boolean isGameOver = false;
 
         graphic.addKeyListener(new KeyListener() {
             @Override
