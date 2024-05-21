@@ -30,7 +30,7 @@ public class GameLogic {
         this.enemies = new ArrayList<>();
         this.bushes = new ArrayList<>();
         this.walls = new ArrayList<>();
-        this.level = 1;
+        this.level = 0;
         this.button = new JButton();
     }
 
